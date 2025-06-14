@@ -5,6 +5,30 @@ import { loadCart } from '../data/cart.js';
 //import '../data/cart-class.js'
 //import '../data/backend-pracctice.js';
 
+async function loadPage() {
+  try {
+    // throw 'error1';
+
+    await loadProductsFetch();
+
+    const value = await new Promise((resolve, reject) => {
+      // throw 'error2';
+      loadCart(() => {
+        // reject('error3');
+        resolve('value3');
+      });
+    });
+
+  } catch (error) {
+    console.log('Unexpected error. Please try again later.');
+  }
+
+  renderOrderSummary();
+  renderPaymentSummary();
+}
+loadPage();
+
+/*
 Promise.all([
     loadProductsFetch(),
     new Promise((resolve) => {
@@ -18,6 +42,7 @@ Promise.all([
     renderOrderSummary();
     renderPaymentSummary();
 });
+*/ 
 
 /*
 new Promise((resolve) => {
