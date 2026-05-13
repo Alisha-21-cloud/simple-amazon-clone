@@ -2,28 +2,54 @@ export let cart;
 
 loadFromStorage();
 
+function normalizeCartItems() {
+  if (!Array.isArray(cart)) {
+    cart = [];
+  }
+
+  cart.forEach((cartItem) => {
+    if (cartItem.deliveryOptionId === undefined) {
+      if (cartItem.deliveryOptionsId !== undefined) {
+        cartItem.deliveryOptionId = cartItem.deliveryOptionsId;
+        delete cartItem.deliveryOptionsId;
+      } else {
+        cartItem.deliveryOptionId = '1';
+      }
+    }
+  });
+}
+
+function setCartItems(newCart) {
+  cart = Array.isArray(newCart) ? newCart : [];
+  normalizeCartItems();
+  saveToStorage();
+}
+
 export function loadFromStorage() {
   cart = JSON.parse(localStorage.getItem('cart'));
 
-  if(!cart){
+  if (!cart) {
     cart = [{
         productId: 'e43638ce-6aa0-4b85-b27f-e1d07eb678c6',
         quantity: 2,
-        deliveryOptionsId: '1',
+        deliveryOptionId: '1',
     }, {
         productId: '15b6fc6f-327a-4ec4-896f-486349e85a3d',
         quantity: 1,
-        deliveryOptionsId: '2',
+        deliveryOptionId: '2',
     }];
   }
+
+  normalizeCartItems();
 }
 
 function saveToStorage(){
-  localStorage.setItem('cart',JSON.stringify(cart))
+  localStorage.setItem('cart', JSON.stringify(cart));
 }
 
-export function addToCart(productId){
+export function addToCart(productId, quantity = 1){
   let matchingItem;
+  const quantityNumber = Math.max(1, Number(quantity) || 1);
 
   cart.forEach((cartItem) => {
       if(productId === cartItem.productId){
@@ -32,12 +58,12 @@ export function addToCart(productId){
   });
 
   if(matchingItem){
-    matchingItem.quantity += 1;
+    matchingItem.quantity += quantityNumber;
   }else{
       cart.push({
       productId: productId,
-      quantity: 1,
-      deliveryOptionsId: '1'
+      quantity: quantityNumber,
+      deliveryOptionId: '1'
     });
   }
 
@@ -76,7 +102,12 @@ export function loadCart(fun){
   const xhr = new XMLHttpRequest();
 
   xhr.addEventListener( 'load', () => {
-    console.log(xhr.response);
+    try {
+      const cartData = JSON.parse(xhr.response);
+      setCartItems(cartData);
+    } catch (error) {
+      console.log('Unexpected error. Please try again later.');
+    }
     fun();
   });
 
@@ -86,7 +117,16 @@ export function loadCart(fun){
 
 export async function loadCartFetch() {
   const response = await fetch('https://supersimplebackend.dev/cart');
-  const text = await response.text();
-  console.log(text);
-  return text;
+  const cartData = await response.json();
+  setCartItems(cartData);
+  return cartData;
+}
+
+export function getCartQuantity() {
+  return cart.reduce((total, cartItem) => total + cartItem.quantity, 0);
+}
+
+export function clearCart() {
+  cart = [];
+  saveToStorage();
 }

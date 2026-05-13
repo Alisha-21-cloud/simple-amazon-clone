@@ -1,4 +1,4 @@
-import {cart} from '../../data/cart.js';
+import {cart, clearCart, getCartQuantity} from '../../data/cart.js';
 import {getProduct} from '../../data/products.js';
 import {getDeliveryOption} from '../../data/deliveryOptions.js';
 import {formatCurrency} from '../utils/money.js';
@@ -7,6 +7,7 @@ import {addOrder} from '../../data/orders.js';
 export function renderPaymentSummary() {
   let productPriceCents = 0;
   let shippingPriceCents = 0;
+  const cartQuantity = getCartQuantity();
 
   cart.forEach((cartItem) => {
     const product = getProduct(cartItem.productId);
@@ -26,7 +27,7 @@ export function renderPaymentSummary() {
     </div>
 
     <div class="payment-summary-row">
-      <div>Items (3):</div>
+      <div>Items (${cartQuantity}):</div>
       <div class="payment-summary-money">
         $${formatCurrency(productPriceCents)}
       </div>
@@ -69,6 +70,11 @@ export function renderPaymentSummary() {
   document.querySelector('.js-payment-summary')
     .innerHTML = paymentSummaryHTML;
 
+  const returnToHomeLink = document.querySelector('.js-return-to-home-link');
+  if (returnToHomeLink) {
+    returnToHomeLink.textContent = `${cartQuantity} items`;
+  }
+
   document.querySelector('.js-place-order')
     .addEventListener('click', async () => {
       try {
@@ -84,6 +90,7 @@ export function renderPaymentSummary() {
 
         const order = await response.json();
         addOrder(order);
+        clearCart();
 
       } catch (error) {
         console.log('Unexpected error. Try again later.');
