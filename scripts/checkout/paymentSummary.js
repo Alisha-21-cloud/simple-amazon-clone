@@ -78,20 +78,16 @@ export function renderPaymentSummary() {
   document.querySelector('.js-place-order')
     .addEventListener('click', async () => {
       try {
-        const response = await fetch('https://supersimplebackend.dev/orders', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            cart: cart
-          })
-        });
-
-        const order = await response.json();
+        // Create order locally with robust ID generation
+        const orderId = Date.now().toString(36) + Math.random().toString(36).substring(2, 11);
+        const order = {
+          id: orderId,
+          products: cart,
+          orderTime: new Date().toISOString()
+        };
+        
         addOrder(order);
         clearCart();
-
       } catch (error) {
         console.log('Unexpected error. Try again later.');
       }
