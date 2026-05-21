@@ -60,9 +60,7 @@ class Clothing extends Product {
 
 export let products = [];
 
-export let products = [];
-
-export function loadProducts(){
+export function loadProducts(callback){
   products = productsData.map((productDetails) => {
     if (productDetails.type === 'clothing') {
       return new Clothing(productDetails);
@@ -71,6 +69,10 @@ export function loadProducts(){
   });
 
   console.log('load products');
+  
+  if (callback) {
+    callback();
+  }
 }
 
 // Local products data (previously from backend)
