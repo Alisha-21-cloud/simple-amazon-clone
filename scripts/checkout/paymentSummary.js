@@ -78,9 +78,10 @@ export function renderPaymentSummary() {
   document.querySelector('.js-place-order')
     .addEventListener('click', async () => {
       try {
-        // Create order locally
+        // Create order locally with robust ID generation
+        const orderId = Date.now().toString(36) + Math.random().toString(36).substring(2, 11);
         const order = {
-          id: Math.random().toString(36).substr(2, 9),
+          id: orderId,
           products: cart,
           orderTime: new Date().toISOString()
         };
